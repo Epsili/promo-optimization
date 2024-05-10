@@ -64,6 +64,50 @@ def constraint_airtime(var, value, assignment):
         return False
 
 
+def constraint_priority(var, value, assignment):
+    totalReachHighPriority = 0
+    totalReachMediumPriority = 0
+    totalReachLowPriority = 0
+
+    priority = value[0][1]
+    promoDurationSeconds = value[0][2]
+    reachAvgSecond = var[3]
+    totalReach = promoDurationSeconds * reachAvgSecond
+
+    if priority == "H":
+        totalReachHighPriority += totalReach
+    elif priority == "M":
+        totalReachMediumPriority += totalReach
+    elif priority == "L":
+        totalReachLowPriority += totalReach
+
+    for key in assignment.keys():
+        priority = assignment[key][0][1]
+        promoDurationSeconds = assignment[key][0][2]
+        reachAvgSecond = key[3]
+        totalReach = promoDurationSeconds * reachAvgSecond
+
+        if priority == "H":
+            totalReachHighPriority += totalReach
+        elif priority == "M":
+            totalReachMediumPriority += totalReach
+        elif priority == "L":
+            totalReachLowPriority += totalReach
+
+    if len(assignment.keys()) < 3:
+        if (totalReachHighPriority >= totalReachMediumPriority) and (totalReachMediumPriority >= totalReachLowPriority):
+            return True
+        else:
+            return False
+
+    if (totalReachHighPriority > totalReachMediumPriority) and (totalReachMediumPriority > totalReachLowPriority):
+        return True
+    else:
+        return False
+
+
+
+
 
 
 class CSP(BaseModel):
@@ -99,8 +143,9 @@ class CSP(BaseModel):
     @staticmethod
     def is_consistent(var, value, assignment):
         constraintAirtimeCheck = constraint_airtime(var, value, assignment)
+        constraintPriorityCheck = constraint_priority(var, value, assignment)
 
-        if constraintAirtimeCheck:
+        if constraintAirtimeCheck and constraintPriorityCheck:
             return True
         else:
             return False
@@ -113,13 +158,40 @@ class CSP(BaseModel):
         return solution
 
 
-final = CSP.solve()
 
+solution = CSP.solve()
 
 # print solution
-if final is not None:
-    for key in final.keys():
-        print(f"{key} : {final[key]}")
+if solution is not None:
+    for key in solution.keys():
+        print(f"{key} : {solution[key]}")
+
+    # check total reach for high/medium/low
+    totalReachHigh = 0
+    totalReachMedium = 0
+    totalReachLow = 0
+
+    for key in solution.keys():
+        priority = solution[key][0][1]
+        promoDurationSeconds = solution[key][0][2]
+        reachAvgSecond = key[3]
+        reach = promoDurationSeconds * reachAvgSecond
+
+        if priority == "H":
+            totalReachHigh += reach
+        elif priority == "M":
+            totalReachMedium += reach
+        elif priority == "L":
+            totalReachLow += reach
+
+    totalReach = totalReachHigh + totalReachMedium + totalReachLow
+
+    print("")
+    print(f"Total Reach High = {totalReachHigh}")
+    print(f"Total Reach Medium = {totalReachMedium}")
+    print(f"Total Reach Low = {totalReachLow}")
+    print(f"Total Reach = {totalReach}")
+
 
 
 
