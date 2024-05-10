@@ -18,6 +18,10 @@ domains = {}
 slotsSegments = (dfSchedule[["slot", "segment", "total_airtime_seconds", "reach_avg_seconds", "target_audience"]]).values.tolist()
 promos = (dfPromos[["campaign", "priority", "promo_duration_seconds", "target_audience"]]).values.tolist()
 
+# add no promo (that can go anywhere) because some slots/segment will need to be empty
+noPromo = [0, "", 0, "female/male"]
+promos.append(noPromo)
+
 for slotSegment in slotsSegments:
     variable = (int(slotSegment[0]), int(slotSegment[1]), float(slotSegment[2]), float(slotSegment[3]))
     variableTargetAudience = str(slotSegment[4])
@@ -46,6 +50,21 @@ for slotSegment in slotsSegments:
 
 
 
+def constraint_airtime(var, value, assignment):
+    totalAirtime = value[0][2]
+    maxTotalAirtime = var[2]
+
+    for key in assignment.keys():
+        if key[0] == var[0]:
+            totalAirtime += assignment[key][0][2]
+
+    if totalAirtime <= maxTotalAirtime:
+        return True
+    else:
+        return False
+
+
+
 
 class CSP(BaseModel):
 
@@ -71,8 +90,6 @@ class CSP(BaseModel):
 
 
 
-
-
     @staticmethod
     def select_unassigned_variable(assignment):
         unassignedVariables = [var for var in variables if var not in assignment]
@@ -81,7 +98,12 @@ class CSP(BaseModel):
 
     @staticmethod
     def is_consistent(var, value, assignment):
-        return True
+        constraintAirtimeCheck = constraint_airtime(var, value, assignment)
+
+        if constraintAirtimeCheck:
+            return True
+        else:
+            return False
 
 
     @staticmethod
@@ -91,10 +113,15 @@ class CSP(BaseModel):
         return solution
 
 
-sol = CSP.solve()
+final = CSP.solve()
 
-for solKey in sol.keys():
-    print(f"{solKey} : {sol[solKey]}")
+
+# print solution
+if final is not None:
+    for key in final.keys():
+        print(f"{key} : {final[key]}")
+
+
 
 
 
