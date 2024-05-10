@@ -46,16 +46,30 @@ for slotSegment in slotsSegments:
 
 
 
+
 class CSP(BaseModel):
 
-    # @staticmethod
-    # def backtrack(assignment):
-    #     if len(assignment) == len(variables):
-    #         return assignment
-    #
-    #     var = CSP.select_unassigned_variable(assignment=assignment)
-    #
-    #
+    @staticmethod
+    def backtrack(assignment):
+        if len(assignment) == len(variables):
+            return assignment
+
+        var = CSP.select_unassigned_variable(assignment=assignment)
+
+        for value in domains[var]:
+            if CSP.is_consistent(var, value, assignment):
+                assignment[var] = value
+
+                result = CSP.backtrack(assignment)
+
+                if result is not None:
+                    return result
+
+                del assignment[var]
+
+        return None
+
+
 
 
 
@@ -65,17 +79,24 @@ class CSP(BaseModel):
         return min(unassignedVariables, key=lambda var: len(domains[var]))
 
 
-    # @staticmethod
-    # def solve():
-    #     assignment = ()
-    #     solution = CSP.back
+    @staticmethod
+    def is_consistent(var, value, assignment):
+        return True
 
 
-for i in range(0, 20):
-    assignment = {}
-    var = CSP.select_unassigned_variable(assignment=assignment)
-    print(var)
-    variables.remove(var)
+    @staticmethod
+    def solve():
+        assignment = {}
+        solution = CSP.backtrack(assignment=assignment)
+        return solution
+
+
+sol = CSP.solve()
+
+for solKey in sol.keys():
+    print(f"{solKey} : {sol[solKey]}")
+
+
 
 
 
