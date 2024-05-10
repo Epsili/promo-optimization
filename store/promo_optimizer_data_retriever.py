@@ -46,7 +46,7 @@ class PromoOptimizerDataRetriever(BaseModel):
         dfSchedule["reach_avg_seconds"] = dfSchedule["reach_avg"] / 60.0
 
         # get total reach per slot
-        dfSchedule["total_reach"] = dfSchedule["break_total_seconds"] * dfSchedule["reach_avg_seconds"]
+        # dfSchedule["total_reach"] = dfSchedule["break_total_seconds"] * dfSchedule["reach_avg_seconds"]
 
         return dfSchedule
 
