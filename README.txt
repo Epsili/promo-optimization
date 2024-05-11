@@ -14,6 +14,10 @@ The output also shows the total reach of the solution (and the total reach for h
 
 note: some slot segments are empty in the optimal solution
 
+note: you can find the solution in SOLUTION.csv (added Campaign column to assignment_dataset)
+
+
+
 Instructions:
 ============
 
