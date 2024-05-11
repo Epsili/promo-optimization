@@ -1,4 +1,4 @@
-from utils.get_total_reach import get_total_reach
+from get_total_reach import get_total_reach
 
 # print solution (prints assignment and total reaches)
 def print_solution(solution):

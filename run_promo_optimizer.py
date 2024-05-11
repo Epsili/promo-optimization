@@ -1,6 +1,6 @@
-from store.promo_optimizer_data_retriever import PromoOptimizerDataRetriever
-from internal.csp_model import CSP
-from utils.print_solution import print_solution
+from promo_optimizer_data_retriever import PromoOptimizerDataRetriever
+from csp_model import CSP
+from print_solution import print_solution
 
 # load raw data
 dfScheduleRaw = PromoOptimizerDataRetriever.load_schedule_data()
