@@ -96,7 +96,7 @@ def constraint_priority(var, value, assignment):
         elif priority == "L":
             totalReachLowPriority += totalReach
 
-    if len(assignment.keys()) < 3:
+    if len(assignment.keys()) < 10:
         if (totalReachHighPriority >= totalReachMediumPriority) and (totalReachMediumPriority >= totalReachLowPriority):
             return True
         else:
@@ -174,7 +174,7 @@ def optimization_max_airtime(var, value, assignment):
 
         airtimePercentageFilled = (float(totalAirtime) / float(maxTotalAirtime)) * 100.0
 
-        if airtimePercentageFilled > 60:
+        if airtimePercentageFilled > 92:
             return True
         else:
             return False
@@ -203,6 +203,40 @@ def optimization_consecutive_promos(var, value, assignment):
         return False
     else:
         return True
+
+
+def optimization_highest_airtime_highest_reach(var, value, assignment):
+    assignmentNext = assignment.copy()
+    assignmentNext[var] = value
+
+    slotSegments = [v for v in variables if v[0] == var[0]]
+    slotSegmentsNum = len(slotSegments)
+
+    slotSegmentsCurrent = [v for v in assignmentNext.keys() if v[0] == var[0]]
+    slotSegmentsCurrentNum = len(slotSegmentsCurrent)
+
+    if slotSegmentsNum == slotSegmentsCurrentNum:
+        campaigns = []
+        for slotSegment in slotSegmentsCurrent:
+            campaign = (
+                slotSegment[0],
+                slotSegment[1],
+                slotSegment[3],
+                assignmentNext[slotSegment][0][0],
+                assignmentNext[slotSegment][0][2]
+            )
+
+            campaigns.append(campaign)
+
+        campaignsSortedOnReach = sorted(campaigns, key=lambda x: x[2])
+        campaignsSortedOnAirtime = sorted(campaigns, key=lambda x: x[4])
+
+        if campaignsSortedOnReach == campaignsSortedOnAirtime:
+            return True
+        else:
+            return False
+
+    return True
 
 
 
@@ -274,8 +308,9 @@ class CSP(BaseModel):
         optimizationSlotVariety = optimization_slot_variety(var, value, assignment)
         optimizationMaxAirtime = optimization_max_airtime(var, value, assignment)
         optimizationConsecutivePromos = optimization_consecutive_promos(var, value, assignment)
+        optimizationHighestAirtimeHighestReach = optimization_highest_airtime_highest_reach(var, value, assignment)
 
-        if constraintAirtimeCheck and constraintPriorityCheck and constraintShowAllPromos and optimizationMaxAirtime and optimizationSlotVariety and optimizationConsecutivePromos:
+        if constraintAirtimeCheck and constraintPriorityCheck and constraintShowAllPromos and optimizationMaxAirtime:
             return True
         else:
             return False
