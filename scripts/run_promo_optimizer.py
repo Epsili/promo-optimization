@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 from store.promo_optimizer_data_retriever import PromoOptimizerDataRetriever
 
+
+
 dfScheduleRaw = PromoOptimizerDataRetriever.load_schedule_data()
 dfPromosRaw = PromoOptimizerDataRetriever.load_promo_data()
 
@@ -106,7 +108,27 @@ def constraint_priority(var, value, assignment):
         return False
 
 
+def get_total_reach(assignment):
+    # check total reach for high/medium/low
+    totalReachHigh = 0
+    totalReachMedium = 0
+    totalReachLow = 0
 
+    for key in assignment.keys():
+        priority = assignment[key][0][1]
+        promoDurationSeconds = assignment[key][0][2]
+        reachAvgSecond = key[3]
+        reach = promoDurationSeconds * reachAvgSecond
+
+        if priority == "H":
+            totalReachHigh += reach
+        elif priority == "M":
+            totalReachMedium += reach
+        elif priority == "L":
+            totalReachLow += reach
+
+    totalReach = totalReachHigh + totalReachMedium + totalReachLow
+    return totalReach
 
 
 
@@ -138,6 +160,8 @@ class CSP(BaseModel):
     def select_unassigned_variable(assignment):
         unassignedVariables = [var for var in variables if var not in assignment]
         return min(unassignedVariables, key=lambda var: len(domains[var]))
+        # return max(unassignedVariables, key= lambda var: var[3])
+        # return unassignedVariables[0]
 
 
     @staticmethod
