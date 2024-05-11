@@ -12,6 +12,7 @@ I defined the hard constraints and the soft constraints (optimizations) given th
 The output of this code gives the best (most optimal) solution that maximizes the total reach of the promo placements on the TV grid.
 The output also shows the total reach of the solution (and the total reach for high, medium and low priority promos)
 
+note: some slot segments are empty in the optimal solution
 
 Instructions:
 ============
