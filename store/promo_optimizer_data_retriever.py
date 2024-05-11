@@ -74,8 +74,3 @@ class PromoOptimizerDataRetriever(BaseModel):
 
 
 
-
-
-
-
-
