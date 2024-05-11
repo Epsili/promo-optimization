@@ -127,6 +127,83 @@ def constraint_show_all_promos(var, value, assignment):
         return True
 
 
+def optimization_slot_variety(var, value, assignment):
+    assignmentNext = assignment.copy()
+    assignmentNext[var] = value
+
+    slotSegmentsNum = len([v for v in variables if v[0] == var[0]])
+
+    slotSegmentsCurrent = [v for v in assignmentNext.keys() if v[0] == var[0]]
+    slotSegmentsCurrentNum = len(slotSegmentsCurrent)
+
+    if slotSegmentsNum == slotSegmentsCurrentNum:
+        slotCampaignsList = []
+        slotCampaignsSet = set()
+
+        for key in slotSegmentsCurrent:
+            campaign = assignmentNext[key][0][0]
+
+            if campaign != 0:
+                slotCampaignsList.append(campaign)
+                slotCampaignsSet.add(campaign)
+
+        if len(slotCampaignsList) == len(slotCampaignsSet):
+            return True
+        else:
+            return False
+    else:
+        return True
+
+
+
+def optimization_max_airtime(var, value, assignment):
+    assignmentNext = assignment.copy()
+    assignmentNext[var] = value
+
+    slotSegments = [v for v in variables if v[0] == var[0]]
+    slotSegmentsNum = len(slotSegments)
+
+    slotSegmentsCurrent = [v for v in assignmentNext.keys() if v[0] == var[0]]
+    slotSegmentsCurrentNum = len(slotSegmentsCurrent)
+
+    if slotSegmentsNum == slotSegmentsCurrentNum:
+        maxTotalAirtime = var[2]
+        totalAirtime = 0
+        for key in slotSegmentsCurrent:
+            totalAirtime += assignmentNext[key][0][2]
+
+        airtimePercentageFilled = (float(totalAirtime) / float(maxTotalAirtime)) * 100.0
+
+        if airtimePercentageFilled > 60:
+            return True
+        else:
+            return False
+    else:
+        return True
+
+
+def optimization_consecutive_promos(var, value, assignment):
+    assignmentNext = assignment.copy()
+    assignmentNext[var] = value
+
+    assignmentNextSorted = {key: assignmentNext[key] for key in sorted(assignmentNext.keys(), key=lambda x: (x[0], x[1]))}
+
+    promosSorted = [p[0][0] for p in assignmentNextSorted.values()]
+
+    hasSamePromoConsecutively = False
+    for i in range(0, len(promosSorted) - 1):
+        currentPromo = promosSorted[i]
+        nextPromo = promosSorted[i+1]
+
+        if (currentPromo != 0) and (nextPromo != 0) and (currentPromo == nextPromo):
+            hasSamePromoConsecutively = True
+            break
+
+    if hasSamePromoConsecutively:
+        return False
+    else:
+        return True
+
 
 
 
@@ -194,7 +271,11 @@ class CSP(BaseModel):
         constraintPriorityCheck = constraint_priority(var, value, assignment)
         constraintShowAllPromos = constraint_show_all_promos(var, value, assignment)
 
-        if constraintAirtimeCheck and constraintPriorityCheck and constraintShowAllPromos:
+        optimizationSlotVariety = optimization_slot_variety(var, value, assignment)
+        optimizationMaxAirtime = optimization_max_airtime(var, value, assignment)
+        optimizationConsecutivePromos = optimization_consecutive_promos(var, value, assignment)
+
+        if constraintAirtimeCheck and constraintPriorityCheck and constraintShowAllPromos and optimizationMaxAirtime and optimizationSlotVariety and optimizationConsecutivePromos:
             return True
         else:
             return False
