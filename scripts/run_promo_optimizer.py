@@ -108,6 +108,32 @@ def constraint_priority(var, value, assignment):
         return False
 
 
+def constraint_show_all_promos(var, value, assignment):
+    assignmentNext = assignment.copy()
+    assignmentNext[var] = value
+
+    assignedPromos = [p[0][0] for p in assignmentNext.values()]
+    possiblePromos = [p[0] for p in promos]
+
+    if len(assignedPromos) == len(variables):
+        assignedPromosReal = [p for p in assignedPromos if p != 0]
+        possiblePromosReal = [p for p in possiblePromos if p != 0]
+
+        if len(set(assignedPromosReal)) == len(set(possiblePromosReal)):
+            return True
+        else:
+            return False
+    else:
+        return True
+
+
+
+
+
+
+
+
+
 def get_total_reach(assignment):
     # check total reach for high/medium/low
     totalReachHigh = 0
@@ -160,16 +186,15 @@ class CSP(BaseModel):
     def select_unassigned_variable(assignment):
         unassignedVariables = [var for var in variables if var not in assignment]
         return min(unassignedVariables, key=lambda var: len(domains[var]))
-        # return max(unassignedVariables, key= lambda var: var[3])
-        # return unassignedVariables[0]
 
 
     @staticmethod
     def is_consistent(var, value, assignment):
         constraintAirtimeCheck = constraint_airtime(var, value, assignment)
         constraintPriorityCheck = constraint_priority(var, value, assignment)
+        constraintShowAllPromos = constraint_show_all_promos(var, value, assignment)
 
-        if constraintAirtimeCheck and constraintPriorityCheck:
+        if constraintAirtimeCheck and constraintPriorityCheck and constraintShowAllPromos:
             return True
         else:
             return False
